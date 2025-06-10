@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Context;
 
-public class AppDbContext : DbContext
+public class IProdutoRepositoryt : DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options ) : base( options)
+    public IProdutoRepositoryt(DbContextOptions<IProdutoRepositoryt> options ) : base( options)
     {
     }
 

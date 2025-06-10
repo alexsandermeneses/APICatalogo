@@ -1,10 +1,6 @@
-﻿using APICatalogo.Context;
-using APICatalogo.Models;
-using Microsoft.AspNetCore.Http;
+﻿using APICatalogo.Models;
+using APICatalogo.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace APICatalogo.Controllers
 {
@@ -12,89 +8,83 @@ namespace APICatalogo.Controllers
     [ApiController]
     public class ProdutosController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IProdutoRepository _repository;
 
-        public ProdutosController(AppDbContext context)
+        public ProdutosController(IProdutoRepository repository)
         {
-            _context = context;
-        }
-
-        //[HttpGet("primeiro")]
-        [HttpGet("/primeiro")]
-        //[HttpGet]
-        public async Task<ActionResult<IEnumerable<Produto>>> Get2()
-        {
-            return await _context.Produtos.AsNoTracking().ToListAsync();
+            _repository = repository;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<Produto>> Get()
         {
-            var produtos = _context.Produtos.AsNoTracking().ToList();
+            var produtos = _repository.GetProdutos().ToList();    
 
             if (produtos is null) { 
                 return NotFound("Produtos não encontrados");
             }
 
-            return produtos;    
+            return Ok(produtos);    
         }
 
         [HttpGet("{id:int}", Name ="ObterProduto")]
-        public async Task<ActionResult<Produto>> Get([FromQuery]int id)
+        public  ActionResult<Produto> Get(int id)
         {
 
-            var produto = await _context.Produtos.AsNoTracking().
-                FirstOrDefaultAsync(p => p.ProdutoId == id);
+            var produto =  _repository.GetProduto(id);
 
-            if (produto == null) { 
+            if (produto is null) { 
                 return NotFound($"Produto de código {id} não encontrado");
             }
 
-            return produto;
+            return Ok(produto);
         }
 
         [HttpPost]
         public ActionResult Post(Produto produto) 
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest();
-            }
-            _context.Produtos.Add(produto); // salva em memória
-            _context.SaveChanges(); //persiste os dados na tabela
+
+            var novoProduto = _repository.Create(produto);
             
             return new CreatedAtRouteResult("ObterProduto", 
-                new { id=produto.ProdutoId}, produto);
+                new { id=novoProduto.ProdutoId}, novoProduto);
         }
 
         [HttpPut("{id:int}")]
         public ActionResult Put(int id, Produto produto)
         {
-            if(id != produto.ProdutoId)
+            if (id != produto.ProdutoId)
             {
                 return BadRequest();
             }
-            _context.Entry(produto).State = EntityState.Modified;
-            _context.SaveChanges();
+           
+            bool atualizado = _repository.Update(produto);
 
-            return Ok(produto);
+            if (atualizado)
+            {
+                return Ok(produto);
+            }
+            else 
+            {
+                return StatusCode(500, $"Falha ao atualizar o produto de id: {id}");
+            }
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id) 
         {
-            var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
-            //var produto = _context.Produtos.Find(id);
+           bool deletado = _repository.Delete(id);
 
-            if (produto is null) 
+            if (deletado)
             {
-                return NotFound("Produto não encontrado");
+                return Ok($"Produto de id {id} excluido");
             }
-
-            _context.Produtos.Remove(produto);
-            _context.SaveChanges();
-
-            return Ok($"Produto deletado"); //ou apenas coloca o objeto "produto"
+            else
+            {
+                return StatusCode(500, $"Falha ao excluir o produto de id: {id}");
+            }
         }
     }
 }

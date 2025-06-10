@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace APICatalogo.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(IProdutoRepositoryt))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

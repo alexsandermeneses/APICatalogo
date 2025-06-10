@@ -26,7 +26,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 string mySqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(options => 
+builder.Services.AddDbContext<IProdutoRepositoryt>(options => 
                            options.UseMySql(mySqlConnection, 
                            ServerVersion.AutoDetect(mySqlConnection)));
 
@@ -40,6 +40,7 @@ builder.Services.Configure < ApiBehaviorOptions>(options =>
 builder.Services.AddScoped<ApiLoggingFilter>();
 
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped <IProdutoRepository, ProdutoRepository>();
 
 builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
 {

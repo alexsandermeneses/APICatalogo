@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace APICatalogo.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(IProdutoRepositoryt))]
     [Migration("20250522082416_PopulaProduto")]
     partial class PopulaProduto
     {
