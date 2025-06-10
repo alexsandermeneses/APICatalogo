@@ -2,5 +2,15 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/APICatalogo.sln
-/.vs/APICatalogo/FileContentIndex
+# Arquivos gerados pelo .NET / Visual Studio
+[Bb]in/
+[Oo]bj/
+.vs/
+*.pdb
+*.user
+*.suo
+*.vspscc
+*.vssscc
+*.vswps
+_ReSharper.*/
+*.bak
