@@ -1,7 +1,6 @@
-﻿namespace APICatalogo.Services
+﻿namespace APICatalogo.Services;
+
+public interface IMeuServico
 {
-    public interface IMeuServico
-    {
-        string Saudacao(string nome);
-    }
+    string Saudacao(string nome);
 }
