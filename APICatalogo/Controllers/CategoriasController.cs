@@ -8,26 +8,27 @@ namespace APICatalogo.Controllers;
 [ApiController]
 public class CategoriasController : ControllerBase
 {
-    private readonly IRepository<Categoria> _repository;
+    private readonly IUnitOfWork _uof;
     private readonly ILogger<CategoriasController> _logger;
 
-    public CategoriasController(ICategoriaRepository repository, ILogger<CategoriasController> logger)
+    public CategoriasController(ICategoriaRepository repository, ILogger<CategoriasController> logger, IUnitOfWork uof)
     {
-        _repository = repository;
         _logger = logger;
+        _uof = uof;
     }
 
     [HttpGet]
     public ActionResult<IEnumerable<Categoria>> Get()
     {
-        var categorias = _repository.GetAll();  
-        return Ok (categorias); //retorna status code 200 (ok)
+        //var categorias = _repository.GetAll();  //com a implementação do UOF, não usa o repository. O repository da entidade está na classe UnitOfWork 
+        var categorias = _uof.CategoriaRepository.GetAll();
+        return Ok (categorias);
     }
 
     [HttpGet("{id:int}", Name = "ObterCategoria")]
     public ActionResult<Categoria> Get(int id)
     {
-        var categoria = _repository.Get(c => c.CategoriaId == id);
+        var categoria = _uof.CategoriaRepository.Get(c => c.CategoriaId == id);
 
         if (categoria is null)
         {
@@ -46,8 +47,8 @@ public class CategoriasController : ControllerBase
             return BadRequest("Dados inválidos");
         }
 
-       var categoriaCriada =_repository.Create(categoria);
-
+        var categoriaCriada =_uof.CategoriaRepository.Create(categoria);//troca do _repository para _uof
+        _uof.Commit(); // com a remoção do savechanges do repositoy, se usa o commit do unitofwork garantindo a atomicidade da operação
         return new CreatedAtRouteResult("ObterCategoria", new { id = categoriaCriada.CategoriaId }, categoriaCriada);
     }
 
@@ -60,14 +61,15 @@ public class CategoriasController : ControllerBase
             return BadRequest("Dados inválidos");
         }
 
-       _repository.Update(categoria);
+        _uof.CategoriaRepository.Update(categoria); // change of _repository to _uof 
+        _uof.Commit(); //com a remoção do savechange do repository, se usa o commit do unitofwork para garantir a atomicidade da operação
         return Ok(categoria);
     }
 
     [HttpDelete("{id:int}")]
     public ActionResult Delete(int id)
     {
-        var categoria = _repository.Get(c => c.CategoriaId == id);
+        var categoria = _uof.CategoriaRepository.Get(c => c.CategoriaId == id);
 
         if (categoria is null)
         {
@@ -75,7 +77,8 @@ public class CategoriasController : ControllerBase
             return NotFound($"Categoria com id={id} não encontrada...");
         }
 
-        var categoriaExcluida = _repository.Delete(categoria);
+        var categoriaExcluida = _uof.CategoriaRepository.Delete(categoria);
+        _uof.Commit(); //persistencia com o método commit
         return Ok(categoria);
     }
 }
