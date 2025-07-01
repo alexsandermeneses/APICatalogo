@@ -28,7 +28,9 @@ public class Produto : IValidatableObject
     public string? ImagemUrl { get; set; }
 
     public float Estoque { get; set; }
+
     public DateTime DataCadastro { get; set; }
+
     public int CategoriaId {  get; set; } // mapeai coluna ID da categoria produts
 
     [JsonIgnore]
